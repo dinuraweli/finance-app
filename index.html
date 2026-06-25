@@ -143,10 +143,6 @@
             white-space: nowrap;
         }
 
-        .save-indicator.saving {
-            opacity: 0.5;
-        }
-
         .save-indicator.error {
             color: var(--danger-color);
         }
@@ -849,13 +845,6 @@
             border-color: var(--accent-color);
         }
 
-        /* ===== LOADING ===== */
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-light);
-        }
-
         /* ===== MOBILE RESPONSIVENESS ===== */
         @media (max-width: 768px) {
             .sidebar {
@@ -999,11 +988,11 @@
 
         <!-- Sidebar Navigation -->
         <div class="sidebar">
-            <button class="sidebar-btn active" data-section="dashboard">📊 Dashboard</button>
-            <button class="sidebar-btn" data-section="tasks">📋 Tasks</button>
-            <button class="sidebar-btn" data-section="decisions">💡 Decisions</button>
-            <button class="sidebar-btn" data-section="meetings">📝 Meeting Notes</button>
-            <button class="sidebar-btn" data-section="search">🔍 Search</button>
+            <button class="sidebar-btn active" data-section="dashboard" onclick="switchSection('dashboard')">📊 Dashboard</button>
+            <button class="sidebar-btn" data-section="tasks" onclick="switchSection('tasks')">📋 Tasks</button>
+            <button class="sidebar-btn" data-section="decisions" onclick="switchSection('decisions')">💡 Decisions</button>
+            <button class="sidebar-btn" data-section="meetings" onclick="switchSection('meetings')">📝 Meeting Notes</button>
+            <button class="sidebar-btn" data-section="search" onclick="switchSection('search')">🔍 Search</button>
         </div>
 
         <!-- Main Content -->
@@ -1040,7 +1029,7 @@
 
                 <div class="form-container" id="taskForm" style="display:none">
                     <h3>Add New Task</h3>
-                    <form onsubmit="addTask(event)">
+                    <form id="taskFormElement" onsubmit="addTask(event)">
                         <div class="form-group">
                             <input type="text" id="taskTitle" placeholder="Task title" required>
                         </div>
@@ -1104,7 +1093,7 @@
                 
                 <div class="form-container" id="decisionForm" style="display:none">
                     <h3>Add New Decision</h3>
-                    <form onsubmit="addDecision(event)">
+                    <form id="decisionFormElement" onsubmit="addDecision(event)">
                         <div class="form-group">
                             <input type="text" id="decisionTitle" placeholder="Decision title" required>
                         </div>
@@ -1142,7 +1131,7 @@
                 
                 <div class="form-container" id="meetingForm" style="display:none">
                     <h3>Add New Meeting Note</h3>
-                    <form onsubmit="addMeetingNote(event)">
+                    <form id="meetingFormElement" onsubmit="addMeetingNote(event)">
                         <div class="form-group">
                             <input type="text" id="meetingTitle" placeholder="Meeting title" required>
                         </div>
@@ -1216,37 +1205,105 @@
         const supabaseUrl = 'https://afolonwcevpgwldoqzcr.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb2xvbndjZXZwZ3dsZG9xemNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNjQ0NTgsImV4cCI6MjA5Nzk0MDQ1OH0.Va_Sy8LLjTw1a0tp4ZfTmT52H5kj-50sr4_PA_EHgMM';
         
-        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
         // ============================================================
-        // DATA MANAGEMENT
+        // GLOBAL STATE
         // ============================================================
-        let taskListener = null;
-        let decisionListener = null;
-        let meetingListener = null;
-
         window.tasks = [];
         window.decisions = [];
         window.meetings = [];
+        let currentCommentItem = null;
+        let currentCommentType = null;
+        let darkMode = localStorage.getItem('darkMode') === 'true';
+
+        // ============================================================
+        // INITIALIZATION
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+        });
 
         function initApp() {
             setupNavigation();
             setupEditableTitle();
-            setupDarkMode();
-            setupTagFilter();
+            applyDarkMode();
             loadAllData();
+            setupTagFilter();
             checkDueDates();
             setInterval(checkDueDates, 60000);
             console.log('🚀 Finance App initialized with Supabase!');
         }
 
         // ============================================================
-        // LOAD DATA
+        // NAVIGATION
+        // ============================================================
+        function setupNavigation() {
+            // Sidebar buttons already have onclick
+        }
+
+        function switchSection(sectionId) {
+            // Update sidebar buttons
+            document.querySelectorAll('.sidebar-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.sidebar-btn[data-section="${sectionId}"]`).classList.add('active');
+            
+            // Update sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // ============================================================
+        // APP TITLE
+        // ============================================================
+        function setupEditableTitle() {
+            const titleEl = document.getElementById('appTitle');
+            if (titleEl) {
+                const savedTitle = localStorage.getItem('appTitle');
+                if (savedTitle) titleEl.textContent = savedTitle;
+                titleEl.addEventListener('blur', function() {
+                    const newName = this.textContent.trim();
+                    if (newName) {
+                        localStorage.setItem('appTitle', newName);
+                        showNotification(`📝 App name updated to "${newName}"`);
+                    } else {
+                        this.textContent = 'Finance App';
+                        localStorage.setItem('appTitle', 'Finance App');
+                    }
+                });
+                titleEl.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.blur();
+                    }
+                });
+            }
+        }
+
+        // ============================================================
+        // DARK MODE
+        // ============================================================
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            localStorage.setItem('darkMode', darkMode);
+            applyDarkMode();
+            showNotification(darkMode ? '🌙 Dark mode enabled' : '☀️ Light mode enabled');
+        }
+
+        function applyDarkMode() {
+            document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+        }
+
+        // ============================================================
+        // LOAD DATA FROM SUPABASE
         // ============================================================
         async function loadAllData() {
             try {
                 // Load tasks
-                const { data: tasksData, error: tasksError } = await supabase
+                const { data: tasksData, error: tasksError } = await supabaseClient
                     .from('app_data')
                     .select('*')
                     .eq('type', 'task')
@@ -1261,7 +1318,7 @@
                 renderTasks();
 
                 // Load decisions
-                const { data: decisionsData, error: decisionsError } = await supabase
+                const { data: decisionsData, error: decisionsError } = await supabaseClient
                     .from('app_data')
                     .select('*')
                     .eq('type', 'decision')
@@ -1276,7 +1333,7 @@
                 renderDecisions();
 
                 // Load meetings
-                const { data: meetingsData, error: meetingsError } = await supabase
+                const { data: meetingsData, error: meetingsError } = await supabaseClient
                     .from('app_data')
                     .select('*')
                     .eq('type', 'meeting')
@@ -1302,59 +1359,27 @@
                 console.error('Error loading data:', error);
                 document.getElementById('saveIndicator').textContent = '⚠️ Error loading data';
                 document.getElementById('saveIndicator').style.color = 'var(--danger-color)';
+                alert('Error loading data from Supabase. Please check your configuration.');
             }
         }
 
         // ============================================================
-        // REAL-TIME SUBSCRIPTIONS (Supabase Realtime)
+        // REAL-TIME SUBSCRIPTIONS
         // ============================================================
         function setupRealtimeSubscriptions() {
-            // Unsubscribe from existing subscriptions
-            if (taskListener) taskListener.unsubscribe();
-            if (decisionListener) decisionListener.unsubscribe();
-            if (meetingListener) meetingListener.unsubscribe();
-
-            // Subscribe to tasks
-            taskListener = supabase
-                .channel('tasks-changes')
+            const channel = supabaseClient
+                .channel('app-data-changes')
                 .on('postgres_changes', {
                     event: '*',
                     schema: 'public',
-                    table: 'app_data',
-                    filter: 'type=eq.task'
+                    table: 'app_data'
                 }, (payload) => {
-                    handleRealtimeUpdate('task', payload);
-                })
-                .subscribe();
-
-            // Subscribe to decisions
-            decisionListener = supabase
-                .channel('decisions-changes')
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'app_data',
-                    filter: 'type=eq.decision'
-                }, (payload) => {
-                    handleRealtimeUpdate('decision', payload);
-                })
-                .subscribe();
-
-            // Subscribe to meetings
-            meetingListener = supabase
-                .channel('meetings-changes')
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'app_data',
-                    filter: 'type=eq.meeting'
-                }, (payload) => {
-                    handleRealtimeUpdate('meeting', payload);
+                    handleRealtimeUpdate(payload);
                 })
                 .subscribe();
         }
 
-        function handleRealtimeUpdate(type, payload) {
+        function handleRealtimeUpdate(payload) {
             const event = payload.eventType;
             const newData = payload.new;
             const oldData = payload.old;
@@ -1365,19 +1390,19 @@
                     ...newData.data,
                     comments: newData.data.comments || []
                 };
-                if (type === 'task') {
+                if (newData.type === 'task') {
                     window.tasks.unshift(item);
                     renderTasks();
-                } else if (type === 'decision') {
+                } else if (newData.type === 'decision') {
                     window.decisions.unshift(item);
                     renderDecisions();
-                } else if (type === 'meeting') {
+                } else if (newData.type === 'meeting') {
                     window.meetings.unshift(item);
                     renderMeetings();
                 }
                 updateDashboard();
                 updateTagFilter();
-                showNotification(`🔄 New ${type} added: ${item.title}`);
+                showNotification(`🔄 New ${newData.type} added: ${item.title}`);
             } else if (event === 'UPDATE') {
                 const updatedItem = {
                     id: newData.id,
@@ -1385,9 +1410,9 @@
                     comments: newData.data.comments || []
                 };
                 let list;
-                if (type === 'task') {
+                if (newData.type === 'task') {
                     list = window.tasks;
-                } else if (type === 'decision') {
+                } else if (newData.type === 'decision') {
                     list = window.decisions;
                 } else {
                     list = window.meetings;
@@ -1396,31 +1421,41 @@
                 if (index !== -1) {
                     list[index] = updatedItem;
                 }
-                if (type === 'task') renderTasks();
-                else if (type === 'decision') renderDecisions();
+                if (newData.type === 'task') renderTasks();
+                else if (newData.type === 'decision') renderDecisions();
                 else renderMeetings();
                 updateDashboard();
                 updateTagFilter();
             } else if (event === 'DELETE') {
-                if (type === 'task') {
+                if (oldData.type === 'task') {
                     window.tasks = window.tasks.filter(item => item.id !== oldData.id);
                     renderTasks();
-                } else if (type === 'decision') {
+                } else if (oldData.type === 'decision') {
                     window.decisions = window.decisions.filter(item => item.id !== oldData.id);
                     renderDecisions();
-                } else {
+                } else if (oldData.type === 'meeting') {
                     window.meetings = window.meetings.filter(item => item.id !== oldData.id);
                     renderMeetings();
                 }
                 updateDashboard();
                 updateTagFilter();
-                showNotification(`🗑️ ${type} deleted`);
+                showNotification(`🗑️ ${oldData.type} deleted`);
             }
         }
 
         // ============================================================
         // TASK FUNCTIONS
         // ============================================================
+        function openTaskForm() {
+            document.getElementById('taskForm').style.display = 'block';
+            document.getElementById('taskForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeTaskForm() {
+            document.getElementById('taskForm').style.display = 'none';
+            document.getElementById('taskFormElement').reset();
+        }
+
         async function addTask(event) {
             event.preventDefault();
             const title = document.getElementById('taskTitle').value.trim();
@@ -1447,7 +1482,7 @@
                     createdBy: 'User'
                 };
 
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('app_data')
                     .insert([{ type: 'task', data: taskData }]);
 
@@ -1475,9 +1510,8 @@
                     updatedAt: new Date().toISOString()
                 };
                 delete updatedData.id;
-                delete updatedData.comments;
 
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('app_data')
                     .update({ data: updatedData, updated_at: new Date().toISOString() })
                     .eq('id', taskId);
@@ -1496,7 +1530,7 @@
         async function deleteTask(taskId) {
             if (!confirm('Delete this task?')) return;
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('app_data')
                     .delete()
                     .eq('id', taskId);
@@ -1510,11 +1544,158 @@
         }
 
         // ============================================================
+        // DECISION FUNCTIONS
+        // ============================================================
+        function openDecisionForm() {
+            document.getElementById('decisionForm').style.display = 'block';
+            document.getElementById('decisionForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeDecisionForm() {
+            document.getElementById('decisionForm').style.display = 'none';
+            document.getElementById('decisionFormElement').reset();
+        }
+
+        async function addDecision(event) {
+            event.preventDefault();
+            const title = document.getElementById('decisionTitle').value.trim();
+            const description = document.getElementById('decisionDescription').value.trim();
+            const date = document.getElementById('decisionDate').value;
+            const tags = document.getElementById('decisionTags').value.split(',').map(t => t.trim()).filter(t => t);
+            const fileInput = document.getElementById('decisionFile');
+
+            if (!title) return;
+
+            try {
+                let fileData = null;
+                if (fileInput.files && fileInput.files[0]) {
+                    fileData = await uploadFile(fileInput.files[0]);
+                }
+
+                const decisionData = {
+                    title,
+                    description,
+                    date: date || new Date().toISOString().split('T')[0],
+                    tags,
+                    file: fileData,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    comments: [],
+                    createdBy: 'User'
+                };
+
+                const { error } = await supabaseClient
+                    .from('app_data')
+                    .insert([{ type: 'decision', data: decisionData }]);
+
+                if (error) throw error;
+
+                closeDecisionForm();
+                document.getElementById('decisionTitle').value = '';
+                document.getElementById('decisionDescription').value = '';
+                document.getElementById('decisionTags').value = '';
+                document.getElementById('decisionFile').value = '';
+                showNotification(`💡 Decision "${title}" recorded!`);
+            } catch (error) {
+                console.error('Error adding decision:', error);
+                alert('Error adding decision. Please try again.');
+            }
+        }
+
+        async function deleteDecision(decisionId) {
+            if (!confirm('Delete this decision?')) return;
+            try {
+                const { error } = await supabaseClient
+                    .from('app_data')
+                    .delete()
+                    .eq('id', decisionId);
+
+                if (error) throw error;
+                showNotification('🗑️ Decision deleted');
+            } catch (error) {
+                console.error('Error deleting decision:', error);
+                alert('Error deleting decision. Please try again.');
+            }
+        }
+
+        // ============================================================
+        // MEETING FUNCTIONS
+        // ============================================================
+        function openMeetingForm() {
+            document.getElementById('meetingForm').style.display = 'block';
+            document.getElementById('meetingForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeMeetingForm() {
+            document.getElementById('meetingForm').style.display = 'none';
+            document.getElementById('meetingFormElement').reset();
+        }
+
+        async function addMeetingNote(event) {
+            event.preventDefault();
+            const title = document.getElementById('meetingTitle').value.trim();
+            const date = document.getElementById('meetingDate').value;
+            const notes = document.getElementById('meetingNotes').value.trim();
+            const tags = document.getElementById('meetingTags').value.split(',').map(t => t.trim()).filter(t => t);
+            const fileInput = document.getElementById('meetingFile');
+
+            if (!title) return;
+
+            try {
+                let fileData = null;
+                if (fileInput.files && fileInput.files[0]) {
+                    fileData = await uploadFile(fileInput.files[0]);
+                }
+
+                const meetingData = {
+                    title,
+                    date: date || new Date().toISOString().split('T')[0],
+                    notes,
+                    tags,
+                    file: fileData,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    comments: [],
+                    createdBy: 'User'
+                };
+
+                const { error } = await supabaseClient
+                    .from('app_data')
+                    .insert([{ type: 'meeting', data: meetingData }]);
+
+                if (error) throw error;
+
+                closeMeetingForm();
+                document.getElementById('meetingTitle').value = '';
+                document.getElementById('meetingNotes').value = '';
+                document.getElementById('meetingTags').value = '';
+                document.getElementById('meetingFile').value = '';
+                showNotification(`📝 Meeting note "${title}" saved!`);
+            } catch (error) {
+                console.error('Error adding meeting:', error);
+                alert('Error adding meeting note. Please try again.');
+            }
+        }
+
+        async function deleteMeeting(meetingId) {
+            if (!confirm('Delete this meeting note?')) return;
+            try {
+                const { error } = await supabaseClient
+                    .from('app_data')
+                    .delete()
+                    .eq('id', meetingId);
+
+                if (error) throw error;
+                showNotification('🗑️ Meeting note deleted');
+            } catch (error) {
+                console.error('Error deleting meeting:', error);
+                alert('Error deleting meeting note. Please try again.');
+            }
+        }
+
+        // ============================================================
         // COMMENT FUNCTIONS
         // ============================================================
-        let currentCommentItem = null;
-        let currentCommentType = null;
-
         function openComments(itemId, type, title) {
             currentCommentItem = itemId;
             currentCommentType = type;
@@ -1579,7 +1760,7 @@
                 };
                 delete updatedData.id;
 
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('app_data')
                     .update({ data: updatedData, updated_at: new Date().toISOString() })
                     .eq('id', currentCommentItem);
@@ -1603,137 +1784,7 @@
         }
 
         // ============================================================
-        // DECISION FUNCTIONS
-        // ============================================================
-        async function addDecision(event) {
-            event.preventDefault();
-            const title = document.getElementById('decisionTitle').value.trim();
-            const description = document.getElementById('decisionDescription').value.trim();
-            const date = document.getElementById('decisionDate').value;
-            const tags = document.getElementById('decisionTags').value.split(',').map(t => t.trim()).filter(t => t);
-            const fileInput = document.getElementById('decisionFile');
-
-            if (!title) return;
-
-            try {
-                let fileData = null;
-                if (fileInput.files && fileInput.files[0]) {
-                    fileData = await uploadFile(fileInput.files[0]);
-                }
-
-                const decisionData = {
-                    title,
-                    description,
-                    date: date || new Date().toISOString().split('T')[0],
-                    tags,
-                    file: fileData,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    comments: [],
-                    createdBy: 'User'
-                };
-
-                const { error } = await supabase
-                    .from('app_data')
-                    .insert([{ type: 'decision', data: decisionData }]);
-
-                if (error) throw error;
-
-                closeDecisionForm();
-                document.getElementById('decisionTitle').value = '';
-                document.getElementById('decisionDescription').value = '';
-                document.getElementById('decisionTags').value = '';
-                document.getElementById('decisionFile').value = '';
-                showNotification(`💡 Decision "${title}" recorded!`);
-            } catch (error) {
-                console.error('Error adding decision:', error);
-                alert('Error adding decision. Please try again.');
-            }
-        }
-
-        async function deleteDecision(decisionId) {
-            if (!confirm('Delete this decision?')) return;
-            try {
-                const { error } = await supabase
-                    .from('app_data')
-                    .delete()
-                    .eq('id', decisionId);
-
-                if (error) throw error;
-                showNotification('🗑️ Decision deleted');
-            } catch (error) {
-                console.error('Error deleting decision:', error);
-                alert('Error deleting decision. Please try again.');
-            }
-        }
-
-        // ============================================================
-        // MEETING FUNCTIONS
-        // ============================================================
-        async function addMeetingNote(event) {
-            event.preventDefault();
-            const title = document.getElementById('meetingTitle').value.trim();
-            const date = document.getElementById('meetingDate').value;
-            const notes = document.getElementById('meetingNotes').value.trim();
-            const tags = document.getElementById('meetingTags').value.split(',').map(t => t.trim()).filter(t => t);
-            const fileInput = document.getElementById('meetingFile');
-
-            if (!title) return;
-
-            try {
-                let fileData = null;
-                if (fileInput.files && fileInput.files[0]) {
-                    fileData = await uploadFile(fileInput.files[0]);
-                }
-
-                const meetingData = {
-                    title,
-                    date: date || new Date().toISOString().split('T')[0],
-                    notes,
-                    tags,
-                    file: fileData,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    comments: [],
-                    createdBy: 'User'
-                };
-
-                const { error } = await supabase
-                    .from('app_data')
-                    .insert([{ type: 'meeting', data: meetingData }]);
-
-                if (error) throw error;
-
-                closeMeetingForm();
-                document.getElementById('meetingTitle').value = '';
-                document.getElementById('meetingNotes').value = '';
-                document.getElementById('meetingTags').value = '';
-                document.getElementById('meetingFile').value = '';
-                showNotification(`📝 Meeting note "${title}" saved!`);
-            } catch (error) {
-                console.error('Error adding meeting:', error);
-                alert('Error adding meeting note. Please try again.');
-            }
-        }
-
-        async function deleteMeeting(meetingId) {
-            if (!confirm('Delete this meeting note?')) return;
-            try {
-                const { error } = await supabase
-                    .from('app_data')
-                    .delete()
-                    .eq('id', meetingId);
-
-                if (error) throw error;
-                showNotification('🗑️ Meeting note deleted');
-            } catch (error) {
-                console.error('Error deleting meeting:', error);
-                alert('Error deleting meeting note. Please try again.');
-            }
-        }
-
-        // ============================================================
-        // FILE UPLOAD (Supabase Storage)
+        // FILE UPLOAD
         // ============================================================
         async function uploadFile(file) {
             if (!file) return null;
@@ -1743,13 +1794,13 @@
             const filePath = `uploads/${fileName}`;
 
             try {
-                const { data, error } = await supabase.storage
+                const { data, error } = await supabaseClient.storage
                     .from('app-files')
                     .upload(filePath, file);
 
                 if (error) throw error;
 
-                const { data: urlData } = supabase.storage
+                const { data: urlData } = supabaseClient.storage
                     .from('app-files')
                     .getPublicUrl(filePath);
 
@@ -1945,24 +1996,27 @@
         }
 
         // ============================================================
-        // DARK MODE
+        // TAG FILTER
         // ============================================================
-        let darkMode = localStorage.getItem('darkMode') === 'true';
-
-        function toggleDarkMode() {
-            darkMode = !darkMode;
-            localStorage.setItem('darkMode', darkMode);
-            applyDarkMode();
-            showNotification(darkMode ? '🌙 Dark mode enabled' : '☀️ Light mode enabled');
+        function updateTagFilter() {
+            const select = document.getElementById('tagFilter');
+            if (!select) return;
+            const allTags = new Set();
+            (window.tasks || []).forEach(task => (task.tags || []).forEach(tag => allTags.add(tag)));
+            (window.decisions || []).forEach(decision => (decision.tags || []).forEach(tag => allTags.add(tag)));
+            (window.meetings || []).forEach(meeting => (meeting.tags || []).forEach(tag => allTags.add(tag)));
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">All Tags</option>' + Array.from(allTags).sort().map(tag =>
+                `<option value="${escapeHtml(tag)}">#${escapeHtml(tag)}</option>`).join('');
+            select.value = currentValue;
         }
 
-        function applyDarkMode() {
-            document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+        function setupTagFilter() {
+            const select = document.getElementById('tagFilter');
+            if (select) select.addEventListener('change', filterTasks);
         }
 
-        function setupDarkMode() {
-            applyDarkMode();
-        }
+        function filterTasks() { renderTasks(); }
 
         // ============================================================
         // NOTIFICATIONS
@@ -1998,29 +2052,6 @@
         }
 
         // ============================================================
-        // TAG FILTER
-        // ============================================================
-        function updateTagFilter() {
-            const select = document.getElementById('tagFilter');
-            if (!select) return;
-            const allTags = new Set();
-            (window.tasks || []).forEach(task => (task.tags || []).forEach(tag => allTags.add(tag)));
-            (window.decisions || []).forEach(decision => (decision.tags || []).forEach(tag => allTags.add(tag)));
-            (window.meetings || []).forEach(meeting => (meeting.tags || []).forEach(tag => allTags.add(tag)));
-            const currentValue = select.value;
-            select.innerHTML = '<option value="">All Tags</option>' + Array.from(allTags).sort().map(tag =>
-                `<option value="${escapeHtml(tag)}">#${escapeHtml(tag)}</option>`).join('');
-            select.value = currentValue;
-        }
-
-        function setupTagFilter() {
-            const select = document.getElementById('tagFilter');
-            if (select) select.addEventListener('change', filterTasks);
-        }
-
-        function filterTasks() { renderTasks(); }
-
-        // ============================================================
         // EXPORT / IMPORT / RESET
         // ============================================================
         function exportData() {
@@ -2052,7 +2083,7 @@
                 if (!data.tasks && !data.decisions && !data.meetings) throw new Error('Invalid data format');
 
                 // Delete all existing data
-                const { error: deleteError } = await supabase
+                const { error: deleteError } = await supabaseClient
                     .from('app_data')
                     .delete()
                     .neq('id', '00000000-0000-0000-0000-000000000000');
@@ -2063,12 +2094,12 @@
                 const allItems = [
                     ...(data.tasks || []).map(t => ({ type: 'task', data: { ...t, comments: t.comments || [] } })),
                     ...(data.decisions || []).map(d => ({ type: 'decision', data: { ...d, comments: d.comments ||
-                            [] } })),
+                                [] } })),
                     ...(data.meetings || []).map(m => ({ type: 'meeting', data: { ...m, comments: m.comments ||
-                            [] } }))
+                                [] } }))
                 ];
 
-                const { error: insertError } = await supabase
+                const { error: insertError } = await supabaseClient
                     .from('app_data')
                     .insert(allItems);
 
@@ -2076,7 +2107,7 @@
 
                 showNotification('✅ Data imported!');
                 event.target.value = '';
-                await loadAllData(); // Reload everything
+                await loadAllData();
             } catch (error) {
                 alert('Error importing data: ' + error.message);
                 event.target.value = '';
@@ -2087,13 +2118,14 @@
             if (!confirm('⚠️ This will DELETE ALL data. Are you sure?')) return;
             if (!confirm('🔴 Really? All tasks, decisions, and meeting notes will be gone forever!')) return;
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('app_data')
                     .delete()
                     .neq('id', '00000000-0000-0000-0000-000000000000');
 
                 if (error) throw error;
                 showNotification('🗑️ All data reset');
+                await loadAllData();
             } catch (error) {
                 console.error('Error resetting:', error);
                 alert('Error resetting data. Please try again.');
@@ -2101,24 +2133,8 @@
         }
 
         // ============================================================
-        // UTILITY FUNCTIONS
+        // FILE PREVIEW
         // ============================================================
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function formatDate(dateStr) {
-            if (!dateStr) return '';
-            try {
-                const date = new Date(dateStr);
-                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit' });
-            } catch (e) { return dateStr; }
-        }
-
         function previewFile(url, name) {
             const modal = document.getElementById('fileModal');
             const preview = document.getElementById('filePreview');
@@ -2145,90 +2161,31 @@
         }
 
         // ============================================================
-        // NAVIGATION
+        // UTILITY FUNCTIONS
         // ============================================================
-        function setupNavigation() {
-            const sidebarBtns = document.querySelectorAll('.sidebar-btn');
-            const sections = document.querySelectorAll('.section');
-            sidebarBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    sidebarBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const sectionId = btn.dataset.section;
-                    sections.forEach(s => s.classList.remove('active'));
-                    document.getElementById(sectionId).classList.add('active');
-                });
-            });
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
-        // ============================================================
-        // APP TITLE
-        // ============================================================
-        function setupEditableTitle() {
-            const titleEl = document.getElementById('appTitle');
-            if (titleEl) {
-                const savedTitle = localStorage.getItem('appTitle');
-                if (savedTitle) titleEl.textContent = savedTitle;
-                titleEl.addEventListener('blur', () => {
-                    const newName = titleEl.textContent.trim();
-                    if (newName) {
-                        localStorage.setItem('appTitle', newName);
-                        showNotification(`📝 App name updated to "${newName}"`);
-                    } else {
-                        titleEl.textContent = 'Finance App';
-                        localStorage.setItem('appTitle', 'Finance App');
-                    }
-                });
-                titleEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault();
-                        titleEl.blur(); } });
-            }
-        }
-
-        // ============================================================
-        // FORM HELPERS
-        // ============================================================
-        function openTaskForm() {
-            document.getElementById('taskForm').style.display = 'block';
-            document.getElementById('taskForm').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function closeTaskForm() {
-            document.getElementById('taskForm').style.display = 'none';
-            document.getElementById('taskForm').reset();
-        }
-
-        function openDecisionForm() {
-            document.getElementById('decisionForm').style.display = 'block';
-            document.getElementById('decisionForm').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function closeDecisionForm() {
-            document.getElementById('decisionForm').style.display = 'none';
-            document.getElementById('decisionForm').reset();
-        }
-
-        function openMeetingForm() {
-            document.getElementById('meetingForm').style.display = 'block';
-            document.getElementById('meetingForm').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function closeMeetingForm() {
-            document.getElementById('meetingForm').style.display = 'none';
-            document.getElementById('meetingForm').reset();
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit' });
+            } catch (e) { return dateStr; }
         }
 
         // ============================================================
         // MODAL CLOSE ON OUTSIDE CLICK
         // ============================================================
-        document.addEventListener('click', (e) => {
+        document.addEventListener('click', function(e) {
             if (e.target === document.getElementById('fileModal')) closeFileModal();
             if (e.target === document.getElementById('commentsModal')) closeCommentsModal();
         });
-
-        // ============================================================
-        // INITIALIZE
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
