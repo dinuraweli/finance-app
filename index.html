@@ -8,48 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 </head>
 <body>
-    <!-- Auth Screen -->
-    <div id="authScreen" class="auth-screen">
-        <div class="auth-container">
-            <h1 class="auth-title">Finance App</h1>
-            <div id="authForm">
-                <div class="auth-tabs">
-                    <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
-                    <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
-                </div>
-                <form id="loginForm" onsubmit="handleLogin(event)">
-                    <div class="form-group">
-                        <input type="email" id="loginEmail" placeholder="Email" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="loginPassword" placeholder="Password" required>
-                    </div>
-                    <button type="submit" class="btn-primary" style="width:100%">Sign In</button>
-                </form>
-                <form id="signupForm" style="display:none" onsubmit="handleSignup(event)">
-                    <div class="form-group">
-                        <input type="text" id="signupName" placeholder="Your Name" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="email" id="signupEmail" placeholder="Email" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" required minlength="6">
-                    </div>
-                    <button type="submit" class="btn-primary" style="width:100%">Create Account</button>
-                </form>
-                <div id="authError" class="auth-error"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main App (hidden until auth) -->
-    <div id="appContainer" style="display:none">
+    <!-- Main App -->
+    <div id="appContainer">
         <!-- Top Navigation Bar -->
         <nav class="navbar" id="navbar">
             <div class="nav-container">
@@ -62,7 +26,7 @@
                     <button class="nav-btn" onclick="exportData()">📤 Export</button>
                     <button class="nav-btn" onclick="document.getElementById('importInput').click()">📥 Import</button>
                     <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
-                    <button class="nav-btn" onclick="handleLogout()">🚪 Logout</button>
+                    <button class="nav-btn" onclick="resetAllData()" style="color:var(--danger-color)">🗑️ Reset</button>
                 </div>
             </div>
         </nav>
@@ -136,6 +100,7 @@
                                     <option value="You">You</option>
                                     <option value="Friend">Friend</option>
                                     <option value="Both">Both</option>
+                                    <option value="Team">Team</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -272,6 +237,7 @@
                 <h3>Comments</h3>
                 <div id="commentsContainer"></div>
                 <div class="comment-input">
+                    <input type="text" id="commentAuthor" placeholder="Your name" class="comment-author-input">
                     <textarea id="commentText" placeholder="Add a comment..." rows="2"></textarea>
                     <button onclick="addComment()" class="btn-primary">Post</button>
                 </div>
