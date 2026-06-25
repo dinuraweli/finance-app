@@ -6,181 +6,276 @@
     <title>Finance App</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 </head>
 <body>
-    <!-- Top Navigation Bar -->
-    <nav class="navbar" id="navbar">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <h1 class="app-title" id="appTitle" contenteditable="true">Finance App</h1>
-                <span class="save-indicator" id="saveIndicator">● Saved</span>
-            </div>
-            <div class="nav-actions">
-                <button class="nav-btn" onclick="exportData()">📤 Export</button>
-                <button class="nav-btn" onclick="document.getElementById('importInput').click()">📥 Import</button>
-                <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
+    <!-- Auth Screen -->
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-container">
+            <h1 class="auth-title">Finance App</h1>
+            <div id="authForm">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+                    <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+                </div>
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <input type="email" id="loginEmail" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="loginPassword" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%">Sign In</button>
+                </form>
+                <form id="signupForm" style="display:none" onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <input type="text" id="signupName" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="signupEmail" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%">Create Account</button>
+                </form>
+                <div id="authError" class="auth-error"></div>
             </div>
         </div>
-    </nav>
-
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-        <button class="sidebar-btn active" data-section="tasks">📋 Tasks</button>
-        <button class="sidebar-btn" data-section="decisions">💡 Decisions</button>
-        <button class="sidebar-btn" data-section="meetings">📝 Meeting Notes</button>
-        <button class="sidebar-btn" data-section="dashboard">📊 Dashboard</button>
     </div>
 
-    <!-- Main Content Area -->
-    <main class="main-content">
-        <!-- Dashboard Section -->
-        <section id="dashboard" class="section">
-            <h2>Dashboard</h2>
-            <div class="dashboard-stats" id="dashboardStats">
-                <!-- Stats will be rendered here -->
+    <!-- Main App (hidden until auth) -->
+    <div id="appContainer" style="display:none">
+        <!-- Top Navigation Bar -->
+        <nav class="navbar" id="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <h1 class="app-title" id="appTitle" contenteditable="true">Finance App</h1>
+                    <span class="save-indicator" id="saveIndicator">● Connected</span>
+                </div>
+                <div class="nav-actions">
+                    <button class="nav-btn" onclick="toggleDarkMode()">🌓 Theme</button>
+                    <button class="nav-btn" onclick="exportData()">📤 Export</button>
+                    <button class="nav-btn" onclick="document.getElementById('importInput').click()">📥 Import</button>
+                    <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
+                    <button class="nav-btn" onclick="handleLogout()">🚪 Logout</button>
+                </div>
             </div>
-            <div class="dashboard-recent">
-                <h3>Recent Activity</h3>
-                <div id="recentActivity"></div>
-            </div>
-        </section>
+        </nav>
 
-        <!-- Tasks Section -->
-        <section id="tasks" class="section active">
-            <div class="section-header">
-                <h2>Tasks</h2>
-                <button class="add-btn" onclick="openTaskForm()">+ New Task</button>
-            </div>
-            
-            <!-- Task Form (hidden by default) -->
-            <div class="form-container" id="taskForm" style="display:none">
-                <h3>Add New Task</h3>
-                <form onsubmit="addTask(event)">
-                    <div class="form-group">
-                        <input type="text" id="taskTitle" placeholder="Task title" required>
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <button class="sidebar-btn active" data-section="dashboard">📊 Dashboard</button>
+            <button class="sidebar-btn" data-section="tasks">📋 Tasks</button>
+            <button class="sidebar-btn" data-section="decisions">💡 Decisions</button>
+            <button class="sidebar-btn" data-section="meetings">📝 Meeting Notes</button>
+            <button class="sidebar-btn" data-section="search">🔍 Search</button>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <h2>Dashboard</h2>
+                <div class="dashboard-stats" id="dashboardStats"></div>
+                <div class="dashboard-grid">
+                    <div class="dashboard-recent">
+                        <h3>Recent Activity</h3>
+                        <div id="recentActivity"></div>
                     </div>
-                    <div class="form-group">
-                        <textarea id="taskDescription" placeholder="Description" rows="3"></textarea>
+                    <div class="dashboard-upcoming">
+                        <h3>Upcoming Tasks</h3>
+                        <div id="upcomingTasks"></div>
                     </div>
-                    <div class="form-row">
+                </div>
+            </section>
+
+            <!-- Tasks Section -->
+            <section id="tasks" class="section">
+                <div class="section-header">
+                    <h2>Tasks</h2>
+                    <button class="add-btn" onclick="openTaskForm()">+ New Task</button>
+                </div>
+                
+                <div class="filter-bar">
+                    <input type="text" id="taskFilter" placeholder="Filter tasks..." oninput="filterTasks()">
+                    <select id="tagFilter" onchange="filterTasks()">
+                        <option value="">All Tags</option>
+                    </select>
+                </div>
+
+                <!-- Task Form -->
+                <div class="form-container" id="taskForm" style="display:none">
+                    <h3>Add New Task</h3>
+                    <form onsubmit="addTask(event)">
                         <div class="form-group">
-                            <select id="taskPriority">
-                                <option value="low">Low Priority</option>
-                                <option value="medium" selected>Medium Priority</option>
-                                <option value="high">High Priority</option>
-                            </select>
+                            <input type="text" id="taskTitle" placeholder="Task title" required>
                         </div>
                         <div class="form-group">
-                            <input type="date" id="taskDueDate">
+                            <textarea id="taskDescription" placeholder="Description" rows="3"></textarea>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <select id="taskAssignedTo">
-                            <option value="You">You</option>
-                            <option value="Friend">Friend</option>
-                            <option value="Both">Both</option>
-                        </select>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary">Save Task</button>
-                        <button type="button" class="btn-secondary" onclick="closeTaskForm()">Cancel</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Task Board -->
-            <div class="task-board">
-                <div class="task-column" data-status="todo">
-                    <h3>To Do <span class="task-count" id="todoCount">0</span></h3>
-                    <div class="task-list" id="todoTasks"></div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <select id="taskPriority">
+                                    <option value="low">Low Priority</option>
+                                    <option value="medium" selected>Medium Priority</option>
+                                    <option value="high">High Priority</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="date" id="taskDueDate">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <select id="taskAssignedTo">
+                                    <option value="You">You</option>
+                                    <option value="Friend">Friend</option>
+                                    <option value="Both">Both</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="taskTags" placeholder="Tags (comma separated)">
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Task</button>
+                            <button type="button" class="btn-secondary" onclick="closeTaskForm()">Cancel</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="task-column" data-status="progress">
-                    <h3>In Progress <span class="task-count" id="progressCount">0</span></h3>
-                    <div class="task-list" id="progressTasks"></div>
+
+                <!-- Task Board -->
+                <div class="task-board">
+                    <div class="task-column" data-status="todo">
+                        <h3>To Do <span class="task-count" id="todoCount">0</span></h3>
+                        <div class="task-list" id="todoTasks"></div>
+                    </div>
+                    <div class="task-column" data-status="progress">
+                        <h3>In Progress <span class="task-count" id="progressCount">0</span></h3>
+                        <div class="task-list" id="progressTasks"></div>
+                    </div>
+                    <div class="task-column" data-status="done">
+                        <h3>Done <span class="task-count" id="doneCount">0</span></h3>
+                        <div class="task-list" id="doneTasks"></div>
+                    </div>
                 </div>
-                <div class="task-column" data-status="done">
-                    <h3>Done <span class="task-count" id="doneCount">0</span></h3>
-                    <div class="task-list" id="doneTasks"></div>
+            </section>
+
+            <!-- Decisions Section -->
+            <section id="decisions" class="section">
+                <div class="section-header">
+                    <h2>Decisions</h2>
+                    <button class="add-btn" onclick="openDecisionForm()">+ New Decision</button>
+                </div>
+                
+                <div class="form-container" id="decisionForm" style="display:none">
+                    <h3>Add New Decision</h3>
+                    <form onsubmit="addDecision(event)">
+                        <div class="form-group">
+                            <input type="text" id="decisionTitle" placeholder="Decision title" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="decisionDescription" placeholder="Description" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="date" id="decisionDate">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="decisionTags" placeholder="Tags (comma separated)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="decisionFile">Attach File (optional)</label>
+                            <input type="file" id="decisionFile" accept="image/*,.pdf,.doc,.docx,.txt">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Decision</button>
+                            <button type="button" class="btn-secondary" onclick="closeDecisionForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="decisions-list" id="decisionsList"></div>
+            </section>
+
+            <!-- Meeting Notes Section -->
+            <section id="meetings" class="section">
+                <div class="section-header">
+                    <h2>Meeting Notes</h2>
+                    <button class="add-btn" onclick="openMeetingForm()">+ New Meeting Note</button>
+                </div>
+                
+                <div class="form-container" id="meetingForm" style="display:none">
+                    <h3>Add New Meeting Note</h3>
+                    <form onsubmit="addMeetingNote(event)">
+                        <div class="form-group">
+                            <input type="text" id="meetingTitle" placeholder="Meeting title" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="date" id="meetingDate">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="meetingTags" placeholder="Tags (comma separated)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="meetingNotes" placeholder="Key points discussed" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="meetingFile">Attach File (optional)</label>
+                            <input type="file" id="meetingFile" accept="image/*,.pdf,.doc,.docx,.txt">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Meeting Note</button>
+                            <button type="button" class="btn-secondary" onclick="closeMeetingForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="meetings-list" id="meetingsList"></div>
+            </section>
+
+            <!-- Search Section -->
+            <section id="search" class="section">
+                <h2>Search Everything</h2>
+                <div class="search-container">
+                    <input type="text" id="globalSearch" placeholder="Search tasks, decisions, meetings..." oninput="performGlobalSearch()">
+                    <div class="search-filters">
+                        <label><input type="checkbox" value="tasks" checked onchange="performGlobalSearch()"> Tasks</label>
+                        <label><input type="checkbox" value="decisions" checked onchange="performGlobalSearch()"> Decisions</label>
+                        <label><input type="checkbox" value="meetings" checked onchange="performGlobalSearch()"> Meetings</label>
+                    </div>
+                </div>
+                <div id="searchResults"></div>
+            </section>
+        </main>
+
+        <!-- File Preview Modal -->
+        <div class="modal" id="fileModal" style="display:none">
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeFileModal()">&times;</span>
+                <div id="filePreview"></div>
+            </div>
+        </div>
+
+        <!-- Comments Modal -->
+        <div class="modal" id="commentsModal" style="display:none">
+            <div class="modal-content comments-modal">
+                <span class="modal-close" onclick="closeCommentsModal()">&times;</span>
+                <h3>Comments</h3>
+                <div id="commentsContainer"></div>
+                <div class="comment-input">
+                    <textarea id="commentText" placeholder="Add a comment..." rows="2"></textarea>
+                    <button onclick="addComment()" class="btn-primary">Post</button>
                 </div>
             </div>
-        </section>
-
-        <!-- Decisions Section -->
-        <section id="decisions" class="section">
-            <div class="section-header">
-                <h2>Decisions</h2>
-                <button class="add-btn" onclick="openDecisionForm()">+ New Decision</button>
-            </div>
-            
-            <!-- Decision Form -->
-            <div class="form-container" id="decisionForm" style="display:none">
-                <h3>Add New Decision</h3>
-                <form onsubmit="addDecision(event)">
-                    <div class="form-group">
-                        <input type="text" id="decisionTitle" placeholder="Decision title" required>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="decisionDescription" placeholder="Description" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <input type="date" id="decisionDate">
-                    </div>
-                    <div class="form-group">
-                        <label for="decisionFile">Attach File (optional)</label>
-                        <input type="file" id="decisionFile" accept="image/*,.pdf,.doc,.docx,.txt">
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary">Save Decision</button>
-                        <button type="button" class="btn-secondary" onclick="closeDecisionForm()">Cancel</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Decisions List -->
-            <div class="decisions-list" id="decisionsList"></div>
-        </section>
-
-        <!-- Meeting Notes Section -->
-        <section id="meetings" class="section">
-            <div class="section-header">
-                <h2>Meeting Notes</h2>
-                <button class="add-btn" onclick="openMeetingForm()">+ New Meeting Note</button>
-            </div>
-            
-            <!-- Meeting Form -->
-            <div class="form-container" id="meetingForm" style="display:none">
-                <h3>Add New Meeting Note</h3>
-                <form onsubmit="addMeetingNote(event)">
-                    <div class="form-group">
-                        <input type="text" id="meetingTitle" placeholder="Meeting title" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="date" id="meetingDate">
-                    </div>
-                    <div class="form-group">
-                        <textarea id="meetingNotes" placeholder="Key points discussed" rows="4"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="meetingFile">Attach File (optional)</label>
-                        <input type="file" id="meetingFile" accept="image/*,.pdf,.doc,.docx,.txt">
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary">Save Meeting Note</button>
-                        <button type="button" class="btn-secondary" onclick="closeMeetingForm()">Cancel</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Meeting Notes List -->
-            <div class="meetings-list" id="meetingsList"></div>
-        </section>
-    </main>
-
-    <!-- File Preview Modal -->
-    <div class="modal" id="fileModal" style="display:none">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeFileModal()">&times;</span>
-            <div id="filePreview"></div>
         </div>
     </div>
 
