@@ -6,6 +6,10 @@
     <title>Finance App</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@300;400;500;600&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
     
+    <!-- Quill.js for Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -360,6 +364,220 @@
 
         .btn-secondary:hover {
             background: var(--bg-primary);
+        }
+
+        /* ===== QUIL RICH TEXT EDITOR ===== */
+        .quill-editor-container {
+            background: var(--bg-primary);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .quill-editor-container .ql-toolbar {
+            background: var(--bg-secondary);
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 6px 6px 0 0;
+        }
+
+        .quill-editor-container .ql-toolbar .ql-stroke {
+            stroke: var(--text-secondary);
+        }
+
+        .quill-editor-container .ql-toolbar .ql-fill {
+            fill: var(--text-secondary);
+        }
+
+        .quill-editor-container .ql-toolbar .ql-picker {
+            color: var(--text-secondary);
+        }
+
+        .quill-editor-container .ql-toolbar .ql-picker-options {
+            background: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .quill-editor-container .ql-toolbar button:hover {
+            background: var(--bg-primary);
+        }
+
+        .quill-editor-container .ql-toolbar button.ql-active {
+            background: var(--bg-primary);
+        }
+
+        .quill-editor-container .ql-container {
+            border: none;
+            border-radius: 0 0 6px 6px;
+            min-height: 300px;
+            font-family: var(--font-sans);
+            font-size: 1rem;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+        }
+
+        .quill-editor-container .ql-editor {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 300px;
+        }
+
+        .quill-editor-container .ql-editor.ql-blank::before {
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .quill-editor-container .ql-editor img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        /* ===== JOURNAL ENTRIES ===== */
+        .journal-list {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .journal-item {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .journal-item:hover {
+            box-shadow: 0 4px 16px var(--shadow-color);
+        }
+
+        .journal-item .journal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .journal-item .journal-title {
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .journal-item .journal-date {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .journal-item .journal-content {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            max-height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .journal-item .journal-content::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, var(--bg-secondary));
+        }
+
+        .journal-item .journal-content.expanded {
+            max-height: none;
+        }
+
+        .journal-item .journal-content.expanded::after {
+            display: none;
+        }
+
+        .journal-item .journal-expand-btn {
+            margin-top: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .journal-item .journal-expand-btn:hover {
+            text-decoration: underline;
+        }
+
+        .journal-item .journal-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .journal-item .journal-images img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .journal-item .journal-images img:hover {
+            transform: scale(1.02);
+        }
+
+        .journal-item .journal-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+
+        .journal-item .journal-tag {
+            background: var(--bg-primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .journal-item .journal-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .journal-item .journal-actions button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .journal-item .journal-actions button:hover {
+            background: var(--bg-primary);
+        }
+
+        .journal-item .journal-delete {
+            color: var(--danger-color);
+            border-color: var(--danger-color) !important;
+        }
+
+        .journal-item .journal-delete:hover {
+            background: var(--danger-color) !important;
+            color: white !important;
         }
 
         /* ===== FILTER BAR ===== */
@@ -755,6 +973,12 @@
             transition: background 0.3s;
         }
 
+        .modal-content img.fullscreen-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+        }
+
         .comments-modal {
             max-width: 600px;
             width: 90%;
@@ -929,6 +1153,14 @@
             .search-filters {
                 flex-wrap: wrap;
             }
+            
+            .journal-item .journal-images {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .journal-item .journal-images img {
+                height: 100px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -989,9 +1221,10 @@
         <!-- Sidebar Navigation -->
         <div class="sidebar">
             <button class="sidebar-btn active" data-section="dashboard" onclick="switchSection('dashboard')">📊 Dashboard</button>
+            <button class="sidebar-btn" data-section="journal" onclick="switchSection('journal')">📓 Journal</button>
             <button class="sidebar-btn" data-section="tasks" onclick="switchSection('tasks')">📋 Tasks</button>
             <button class="sidebar-btn" data-section="decisions" onclick="switchSection('decisions')">💡 Decisions</button>
-            <button class="sidebar-btn" data-section="meetings" onclick="switchSection('meetings')">📝 Meeting Notes</button>
+            <button class="sidebar-btn" data-section="meetings" onclick="switchSection('meetings')">📝 Meetings</button>
             <button class="sidebar-btn" data-section="search" onclick="switchSection('search')">🔍 Search</button>
         </div>
 
@@ -1011,6 +1244,52 @@
                         <div id="upcomingTasks"></div>
                     </div>
                 </div>
+            </section>
+
+            <!-- Journal Section -->
+            <section id="journal" class="section">
+                <div class="section-header">
+                    <h2>Project Journal</h2>
+                    <button class="add-btn" onclick="openJournalForm()">+ New Entry</button>
+                </div>
+                
+                <div class="filter-bar">
+                    <input type="text" id="journalFilter" placeholder="Filter journal entries..." oninput="filterJournal()">
+                    <select id="journalTagFilter" onchange="filterJournal()">
+                        <option value="">All Tags</option>
+                    </select>
+                </div>
+
+                <div class="form-container" id="journalForm" style="display:none">
+                    <h3>New Journal Entry</h3>
+                    <form id="journalFormElement" onsubmit="addJournalEntry(event)">
+                        <div class="form-group">
+                            <input type="text" id="journalTitle" placeholder="Entry title" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="date" id="journalDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Content (Rich Text)</label>
+                            <div id="journalEditor" class="quill-editor-container"></div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="journalTags" placeholder="Tags (comma separated)">
+                        </div>
+                        <div class="form-group">
+                            <label for="journalImages">Upload Images (Optional)</label>
+                            <input type="file" id="journalImages" accept="image/*" multiple>
+                            <small style="color:var(--text-light);display:block;margin-top:0.25rem;">You can select multiple images at once</small>
+                        </div>
+                        <div id="imagePreviewContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:0.5rem;margin-top:0.5rem;"></div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Entry</button>
+                            <button type="button" class="btn-secondary" onclick="closeJournalForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="journal-list" id="journalList"></div>
             </section>
 
             <!-- Tasks -->
@@ -1164,8 +1443,9 @@
             <section id="search" class="section">
                 <h2>Search Everything</h2>
                 <div class="search-container">
-                    <input type="text" id="globalSearch" placeholder="Search tasks, decisions, meetings..." oninput="performGlobalSearch()">
+                    <input type="text" id="globalSearch" placeholder="Search tasks, decisions, meetings, journal..." oninput="performGlobalSearch()">
                     <div class="search-filters">
+                        <label><input type="checkbox" value="journal" checked onchange="performGlobalSearch()"> Journal</label>
                         <label><input type="checkbox" value="tasks" checked onchange="performGlobalSearch()"> Tasks</label>
                         <label><input type="checkbox" value="decisions" checked onchange="performGlobalSearch()"> Decisions</label>
                         <label><input type="checkbox" value="meetings" checked onchange="performGlobalSearch()"> Meetings</label>
@@ -1174,6 +1454,14 @@
                 <div id="searchResults"></div>
             </section>
         </main>
+
+        <!-- Image Preview Modal -->
+        <div class="modal" id="imageModal" style="display:none">
+            <div class="modal-content" style="max-width:90%;padding:1rem;">
+                <span class="modal-close" onclick="closeImageModal()">&times;</span>
+                <img class="fullscreen-image" id="fullscreenImage" src="" alt="Fullscreen image">
+            </div>
+        </div>
 
         <!-- File Preview Modal -->
         <div class="modal" id="fileModal" style="display:none">
@@ -1213,9 +1501,11 @@
         window.tasks = [];
         window.decisions = [];
         window.meetings = [];
+        window.journals = [];
         let currentCommentItem = null;
         let currentCommentType = null;
         let darkMode = localStorage.getItem('darkMode') === 'true';
+        let quillEditor = null;
 
         // ============================================================
         // INITIALIZATION
@@ -1229,7 +1519,7 @@
             setupEditableTitle();
             applyDarkMode();
             loadAllData();
-            setupTagFilter();
+            setupTagFilters();
             checkDueDates();
             setInterval(checkDueDates, 60000);
             console.log('🚀 Finance App initialized with Supabase!');
@@ -1238,22 +1528,27 @@
         // ============================================================
         // NAVIGATION
         // ============================================================
-        function setupNavigation() {
-            // Sidebar buttons already have onclick
-        }
-
         function switchSection(sectionId) {
-            // Update sidebar buttons
             document.querySelectorAll('.sidebar-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            document.querySelector(`.sidebar-btn[data-section="${sectionId}"]`).classList.add('active');
+            const btn = document.querySelector(`.sidebar-btn[data-section="${sectionId}"]`);
+            if (btn) btn.classList.add('active');
             
-            // Update sections
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
-            document.getElementById(sectionId).classList.add('active');
+            const section = document.getElementById(sectionId);
+            if (section) section.classList.add('active');
+            
+            // Initialize Quill editor when journal section is shown
+            if (sectionId === 'journal' && !quillEditor) {
+                setTimeout(initQuillEditor, 100);
+            }
+        }
+
+        function setupNavigation() {
+            // Already handled by onclick
         }
 
         // ============================================================
@@ -1298,10 +1593,48 @@
         }
 
         // ============================================================
+        // QUILL RICH TEXT EDITOR
+        // ============================================================
+        function initQuillEditor() {
+            if (document.getElementById('journalEditor').children.length > 0) return;
+            
+            quillEditor = new Quill('#journalEditor', {
+                theme: 'snow',
+                placeholder: 'Write your journal entry here...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                }
+            });
+        }
+
+        // ============================================================
         // LOAD DATA FROM SUPABASE
         // ============================================================
         async function loadAllData() {
             try {
+                // Load journal entries
+                const { data: journalData, error: journalError } = await supabaseClient
+                    .from('app_data')
+                    .select('*')
+                    .eq('type', 'journal')
+                    .order('created_at', { ascending: false });
+
+                if (journalError) throw journalError;
+                window.journals = journalData.map(item => ({
+                    id: item.id,
+                    ...item.data,
+                    comments: item.data.comments || []
+                }));
+                renderJournal();
+
                 // Load tasks
                 const { data: tasksData, error: tasksError } = await supabaseClient
                     .from('app_data')
@@ -1348,11 +1681,10 @@
                 renderMeetings();
 
                 updateDashboard();
-                updateTagFilter();
+                updateTagFilters();
                 document.getElementById('saveIndicator').textContent = '● Connected';
                 document.getElementById('saveIndicator').style.color = 'var(--success-color)';
 
-                // Set up real-time subscriptions
                 setupRealtimeSubscriptions();
 
             } catch (error) {
@@ -1390,7 +1722,10 @@
                     ...newData.data,
                     comments: newData.data.comments || []
                 };
-                if (newData.type === 'task') {
+                if (newData.type === 'journal') {
+                    window.journals.unshift(item);
+                    renderJournal();
+                } else if (newData.type === 'task') {
                     window.tasks.unshift(item);
                     renderTasks();
                 } else if (newData.type === 'decision') {
@@ -1401,7 +1736,7 @@
                     renderMeetings();
                 }
                 updateDashboard();
-                updateTagFilter();
+                updateTagFilters();
                 showNotification(`🔄 New ${newData.type} added: ${item.title}`);
             } else if (event === 'UPDATE') {
                 const updatedItem = {
@@ -1410,7 +1745,9 @@
                     comments: newData.data.comments || []
                 };
                 let list;
-                if (newData.type === 'task') {
+                if (newData.type === 'journal') {
+                    list = window.journals;
+                } else if (newData.type === 'task') {
                     list = window.tasks;
                 } else if (newData.type === 'decision') {
                     list = window.decisions;
@@ -1421,13 +1758,17 @@
                 if (index !== -1) {
                     list[index] = updatedItem;
                 }
-                if (newData.type === 'task') renderTasks();
+                if (newData.type === 'journal') renderJournal();
+                else if (newData.type === 'task') renderTasks();
                 else if (newData.type === 'decision') renderDecisions();
                 else renderMeetings();
                 updateDashboard();
-                updateTagFilter();
+                updateTagFilters();
             } else if (event === 'DELETE') {
-                if (oldData.type === 'task') {
+                if (oldData.type === 'journal') {
+                    window.journals = window.journals.filter(item => item.id !== oldData.id);
+                    renderJournal();
+                } else if (oldData.type === 'task') {
                     window.tasks = window.tasks.filter(item => item.id !== oldData.id);
                     renderTasks();
                 } else if (oldData.type === 'decision') {
@@ -1438,13 +1779,216 @@
                     renderMeetings();
                 }
                 updateDashboard();
-                updateTagFilter();
+                updateTagFilters();
                 showNotification(`🗑️ ${oldData.type} deleted`);
             }
         }
 
         // ============================================================
-        // TASK FUNCTIONS
+        // JOURNAL FUNCTIONS
+        // ============================================================
+        function openJournalForm() {
+            document.getElementById('journalForm').style.display = 'block';
+            document.getElementById('journalForm').scrollIntoView({ behavior: 'smooth' });
+            // Initialize Quill editor
+            setTimeout(initQuillEditor, 100);
+        }
+
+        function closeJournalForm() {
+            document.getElementById('journalForm').style.display = 'none';
+            document.getElementById('journalFormElement').reset();
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            document.getElementById('imagePreviewContainer').style.display = 'none';
+            if (quillEditor) {
+                quillEditor.setContents([]);
+            }
+        }
+
+        // Image preview for journal
+        document.addEventListener('change', function(e) {
+            if (e.target.id === 'journalImages') {
+                const container = document.getElementById('imagePreviewContainer');
+                container.innerHTML = '';
+                const files = e.target.files;
+                if (files.length > 0) {
+                    container.style.display = 'grid';
+                    for (let i = 0; i < files.length; i++) {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const img = document.createElement('img');
+                            img.src = event.target.result;
+                            img.style.width = '100%';
+                            img.style.height = '100px';
+                            img.style.objectFit = 'cover';
+                            img.style.borderRadius = '8px';
+                            img.style.border = '1px solid var(--border-color)';
+                            container.appendChild(img);
+                        };
+                        reader.readAsDataURL(files[i]);
+                    }
+                } else {
+                    container.style.display = 'none';
+                }
+            }
+        });
+
+        async function addJournalEntry(event) {
+            event.preventDefault();
+            const title = document.getElementById('journalTitle').value.trim();
+            const date = document.getElementById('journalDate').value;
+            const tags = document.getElementById('journalTags').value.split(',').map(t => t.trim()).filter(t => t);
+            const imageInput = document.getElementById('journalImages');
+
+            if (!title) {
+                alert('Please enter a title');
+                return;
+            }
+
+            // Get content from Quill editor
+            const content = quillEditor ? quillEditor.root.innerHTML : '';
+
+            try {
+                // Upload images first
+                const imageUrls = [];
+                if (imageInput.files && imageInput.files.length > 0) {
+                    for (let i = 0; i < imageInput.files.length; i++) {
+                        const fileData = await uploadFile(imageInput.files[i]);
+                        if (fileData) {
+                            imageUrls.push(fileData);
+                        }
+                    }
+                }
+
+                const journalData = {
+                    title,
+                    date: date || new Date().toISOString().split('T')[0],
+                    content: content,
+                    tags: tags,
+                    images: imageUrls,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    comments: [],
+                    createdBy: 'User'
+                };
+
+                const { error } = await supabaseClient
+                    .from('app_data')
+                    .insert([{ type: 'journal', data: journalData }]);
+
+                if (error) throw error;
+
+                closeJournalForm();
+                document.getElementById('journalTitle').value = '';
+                document.getElementById('journalTags').value = '';
+                document.getElementById('journalImages').value = '';
+                showNotification(`📓 Journal entry "${title}" saved!`);
+            } catch (error) {
+                console.error('Error adding journal entry:', error);
+                alert('Error adding journal entry. Please try again.');
+            }
+        }
+
+        async function deleteJournalEntry(journalId) {
+            if (!confirm('Delete this journal entry?')) return;
+            try {
+                const { error } = await supabaseClient
+                    .from('app_data')
+                    .delete()
+                    .eq('id', journalId);
+
+                if (error) throw error;
+                showNotification('🗑️ Journal entry deleted');
+            } catch (error) {
+                console.error('Error deleting journal entry:', error);
+                alert('Error deleting journal entry. Please try again.');
+            }
+        }
+
+        function toggleJournalExpand(journalId) {
+            const content = document.querySelector(`#journal-content-${journalId}`);
+            const btn = document.querySelector(`#journal-expand-btn-${journalId}`);
+            if (content) {
+                content.classList.toggle('expanded');
+                if (btn) {
+                    btn.textContent = content.classList.contains('expanded') ? 'Show less' : 'Read more';
+                }
+            }
+        }
+
+        function viewJournalImage(url) {
+            const modal = document.getElementById('imageModal');
+            const img = document.getElementById('fullscreenImage');
+            img.src = url;
+            modal.style.display = 'flex';
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+            document.getElementById('fullscreenImage').src = '';
+        }
+
+        // ============================================================
+        // RENDER JOURNAL
+        // ============================================================
+        function renderJournal() {
+            if (!window.journals) return;
+            const container = document.getElementById('journalList');
+            
+            // Apply filters
+            const filterText = document.getElementById('journalFilter')?.value?.toLowerCase() || '';
+            const tagFilter = document.getElementById('journalTagFilter')?.value || '';
+            
+            let entries = window.journals;
+            if (filterText) {
+                entries = entries.filter(j => 
+                    j.title.toLowerCase().includes(filterText) || 
+                    (j.content || '').toLowerCase().includes(filterText)
+                );
+            }
+            if (tagFilter) {
+                entries = entries.filter(j => (j.tags || []).includes(tagFilter));
+            }
+
+            container.innerHTML = entries.map(entry => `
+                    <div class="journal-item">
+                        <div class="journal-header">
+                            <div>
+                                <div class="journal-title">${escapeHtml(entry.title)}</div>
+                                <div class="journal-date">📅 ${formatDate(entry.date || entry.createdAt)}</div>
+                            </div>
+                            <button class="journal-delete" onclick="deleteJournalEntry('${entry.id}')" style="background:none;border:none;color:var(--text-light);cursor:pointer;font-size:1.2rem;">×</button>
+                        </div>
+                        <div class="journal-content" id="journal-content-${entry.id}">
+                            ${entry.content || ''}
+                        </div>
+                        ${entry.content && entry.content.length > 500 ? `
+                            <button class="journal-expand-btn" id="journal-expand-btn-${entry.id}" onclick="toggleJournalExpand('${entry.id}')">Read more</button>
+                        ` : ''}
+                        ${entry.images && entry.images.length > 0 ? `
+                            <div class="journal-images">
+                                ${entry.images.map(img => `
+                                    <img src="${img.url}" alt="${img.name}" onclick="viewJournalImage('${img.url}')" loading="lazy">
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        ${entry.tags && entry.tags.length ? `
+                            <div class="journal-tags">
+                                ${entry.tags.map(tag => `<span class="journal-tag">#${escapeHtml(tag)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="journal-actions">
+                            <button onclick="openComments('${entry.id}', 'journal', '${escapeHtml(entry.title)}')">💬 ${(entry.comments || []).length > 0 ? (entry.comments || []).length : 'Add comment'}</button>
+                        </div>
+                    </div>
+                `).join('') || '<p style="color:var(--text-light);text-align:center;padding:2rem;">No journal entries yet. Start documenting your project progress!</p>';
+        }
+
+        function filterJournal() {
+            renderJournal();
+        }
+
+        // ============================================================
+        // TASK FUNCTIONS (Existing)
         // ============================================================
         function openTaskForm() {
             document.getElementById('taskForm').style.display = 'block';
@@ -1544,7 +2088,7 @@
         }
 
         // ============================================================
-        // DECISION FUNCTIONS
+        // DECISION FUNCTIONS (Existing)
         // ============================================================
         function openDecisionForm() {
             document.getElementById('decisionForm').style.display = 'block';
@@ -1619,7 +2163,7 @@
         }
 
         // ============================================================
-        // MEETING FUNCTIONS
+        // MEETING FUNCTIONS (Existing)
         // ============================================================
         function openMeetingForm() {
             document.getElementById('meetingForm').style.display = 'block';
@@ -1703,7 +2247,9 @@
             const container = document.getElementById('commentsContainer');
 
             let item;
-            if (type === 'task') {
+            if (type === 'journal') {
+                item = window.journals.find(j => j.id === itemId);
+            } else if (type === 'task') {
                 item = window.tasks.find(t => t.id === itemId);
             } else if (type === 'decision') {
                 item = window.decisions.find(d => d.id === itemId);
@@ -1740,7 +2286,9 @@
             try {
                 let item;
                 let list;
-                if (currentCommentType === 'task') {
+                if (currentCommentType === 'journal') {
+                    list = window.journals;
+                } else if (currentCommentType === 'task') {
                     list = window.tasks;
                 } else if (currentCommentType === 'decision') {
                     list = window.decisions;
@@ -1818,7 +2366,7 @@
         }
 
         // ============================================================
-        // RENDER FUNCTIONS
+        // RENDER FUNCTIONS (Existing)
         // ============================================================
         function renderTasks() {
             if (!window.tasks) return;
@@ -1914,19 +2462,21 @@
             const doneTasks = window.tasks ? window.tasks.filter(t => t.status === 'done').length : 0;
             const totalDecisions = window.decisions ? window.decisions.length : 0;
             const totalMeetings = window.meetings ? window.meetings.length : 0;
+            const totalJournals = window.journals ? window.journals.length : 0;
 
             stats.innerHTML = `
                     <div class="stat-card"><span class="stat-number">${totalTasks}</span><span class="stat-label">Total Tasks</span></div>
                     <div class="stat-card"><span class="stat-number">${doneTasks}</span><span class="stat-label">Completed</span></div>
                     <div class="stat-card"><span class="stat-number">${window.tasks ? window.tasks.filter(t => t.status === 'progress').length : 0}</span><span class="stat-label">In Progress</span></div>
-                    <div class="stat-card"><span class="stat-number">${totalDecisions + totalMeetings}</span><span class="stat-label">Notes & Decisions</span></div>
+                    <div class="stat-card"><span class="stat-number">${totalJournals}</span><span class="stat-label">Journal Entries</span></div>
                 `;
 
             const recent = document.getElementById('recentActivity');
             const allItems = [
-                ...(window.tasks || []).map(t => ({ ...t, type: 'task', label: `Task: ${t.title}` })),
-                ...(window.decisions || []).map(d => ({ ...d, type: 'decision', label: `Decision: ${d.title}` })),
-                ...(window.meetings || []).map(m => ({ ...m, type: 'meeting', label: `Meeting: ${m.title}` }))
+                ...(window.journals || []).map(j => ({ ...j, type: 'journal', label: `📓 ${j.title}` })),
+                ...(window.tasks || []).map(t => ({ ...t, type: 'task', label: `📋 ${t.title}` })),
+                ...(window.decisions || []).map(d => ({ ...d, type: 'decision', label: `💡 ${d.title}` })),
+                ...(window.meetings || []).map(m => ({ ...m, type: 'meeting', label: `📝 ${m.title}` }))
             ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10);
 
             recent.innerHTML = allItems.length ? allItems.map(item => `
@@ -1955,6 +2505,15 @@
             }
 
             let allResults = [];
+            if (types.includes('journal') && window.journals) {
+                window.journals.forEach(journal => {
+                    if (journal.title.toLowerCase().includes(query) || 
+                        (journal.content || '').toLowerCase().includes(query) ||
+                        (journal.tags || []).some(t => t.toLowerCase().includes(query))) {
+                        allResults.push({ ...journal, type: 'Journal' });
+                    }
+                });
+            }
             if (types.includes('tasks') && window.tasks) {
                 window.tasks.forEach(task => {
                     if (task.title.toLowerCase().includes(query) || (task.description || '').toLowerCase()
@@ -1985,10 +2544,10 @@
             results.innerHTML = allResults.length === 0 ?
                 '<p style="color:var(--text-light);text-align:center;padding:2rem;">No results found</p>' :
                 allResults.map(item => `
-                        <div class="search-result-item" style="border-left-color: ${item.type === 'Task' ? 'var(--accent-color)' : item.type === 'Decision' ? 'var(--warning-color)' : 'var(--success-color)'}">
+                        <div class="search-result-item" style="border-left-color: ${item.type === 'Journal' ? 'var(--accent-color)' : item.type === 'Task' ? 'var(--accent-color)' : item.type === 'Decision' ? 'var(--warning-color)' : 'var(--success-color)'}">
                             <div class="result-type">${item.type}${item.status ? ` • ${item.status}` : ''}</div>
                             <div class="result-title">${escapeHtml(item.title)}</div>
-                            ${item.description ? `<div>${escapeHtml(item.description.substring(0, 150))}${item.description.length > 150 ? '...' : ''}</div>` : ''}
+                            ${item.description || item.content ? `<div>${escapeHtml((item.description || item.content || '').substring(0, 150))}${(item.description || item.content || '').length > 150 ? '...' : ''}</div>` : ''}
                             ${item.tags && item.tags.length ? `<div class="task-tags">${item.tags.map(tag => `<span class="task-tag">#${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
                             <div style="font-size:0.75rem;color:var(--text-light);margin-top:0.25rem">${formatDate(item.date || item.createdAt)}</div>
                         </div>
@@ -1996,24 +2555,43 @@
         }
 
         // ============================================================
-        // TAG FILTER
+        // TAG FILTERS
         // ============================================================
-        function updateTagFilter() {
-            const select = document.getElementById('tagFilter');
+        function updateTagFilters() {
+            updateTagFilter('tagFilter', ['tasks', 'decisions', 'meetings']);
+            updateTagFilter('journalTagFilter', ['journals']);
+        }
+
+        function updateTagFilter(selectId, sources) {
+            const select = document.getElementById(selectId);
             if (!select) return;
+            
             const allTags = new Set();
-            (window.tasks || []).forEach(task => (task.tags || []).forEach(tag => allTags.add(tag)));
-            (window.decisions || []).forEach(decision => (decision.tags || []).forEach(tag => allTags.add(tag)));
-            (window.meetings || []).forEach(meeting => (meeting.tags || []).forEach(tag => allTags.add(tag)));
+            if (sources.includes('journals')) {
+                (window.journals || []).forEach(journal => (journal.tags || []).forEach(tag => allTags.add(tag)));
+            }
+            if (sources.includes('tasks')) {
+                (window.tasks || []).forEach(task => (task.tags || []).forEach(tag => allTags.add(tag)));
+            }
+            if (sources.includes('decisions')) {
+                (window.decisions || []).forEach(decision => (decision.tags || []).forEach(tag => allTags.add(tag)));
+            }
+            if (sources.includes('meetings')) {
+                (window.meetings || []).forEach(meeting => (meeting.tags || []).forEach(tag => allTags.add(tag)));
+            }
+            
             const currentValue = select.value;
             select.innerHTML = '<option value="">All Tags</option>' + Array.from(allTags).sort().map(tag =>
                 `<option value="${escapeHtml(tag)}">#${escapeHtml(tag)}</option>`).join('');
             select.value = currentValue;
         }
 
-        function setupTagFilter() {
-            const select = document.getElementById('tagFilter');
-            if (select) select.addEventListener('change', filterTasks);
+        function setupTagFilters() {
+            const taskFilter = document.getElementById('tagFilter');
+            if (taskFilter) taskFilter.addEventListener('change', filterTasks);
+            
+            const journalFilter = document.getElementById('journalTagFilter');
+            if (journalFilter) journalFilter.addEventListener('change', filterJournal);
         }
 
         function filterTasks() { renderTasks(); }
@@ -2056,6 +2634,7 @@
         // ============================================================
         function exportData() {
             const data = {
+                journals: window.journals || [],
                 tasks: window.tasks || [],
                 decisions: window.decisions || [],
                 meetings: window.meetings || [],
@@ -2080,7 +2659,7 @@
             try {
                 const text = await file.text();
                 const data = JSON.parse(text);
-                if (!data.tasks && !data.decisions && !data.meetings) throw new Error('Invalid data format');
+                if (!data.journals && !data.tasks && !data.decisions && !data.meetings) throw new Error('Invalid data format');
 
                 // Delete all existing data
                 const { error: deleteError } = await supabaseClient
@@ -2092,11 +2671,10 @@
 
                 // Import new data
                 const allItems = [
+                    ...(data.journals || []).map(j => ({ type: 'journal', data: { ...j, comments: j.comments || [] } })),
                     ...(data.tasks || []).map(t => ({ type: 'task', data: { ...t, comments: t.comments || [] } })),
-                    ...(data.decisions || []).map(d => ({ type: 'decision', data: { ...d, comments: d.comments ||
-                                [] } })),
-                    ...(data.meetings || []).map(m => ({ type: 'meeting', data: { ...m, comments: m.comments ||
-                                [] } }))
+                    ...(data.decisions || []).map(d => ({ type: 'decision', data: { ...d, comments: d.comments || [] } })),
+                    ...(data.meetings || []).map(m => ({ type: 'meeting', data: { ...m, comments: m.comments || [] } }))
                 ];
 
                 const { error: insertError } = await supabaseClient
@@ -2116,7 +2694,7 @@
 
         async function resetAllData() {
             if (!confirm('⚠️ This will DELETE ALL data. Are you sure?')) return;
-            if (!confirm('🔴 Really? All tasks, decisions, and meeting notes will be gone forever!')) return;
+            if (!confirm('🔴 Really? All tasks, decisions, meeting notes, and journal entries will be gone forever!')) return;
             try {
                 const { error } = await supabaseClient
                     .from('app_data')
@@ -2183,6 +2761,7 @@
         // MODAL CLOSE ON OUTSIDE CLICK
         // ============================================================
         document.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('imageModal')) closeImageModal();
             if (e.target === document.getElementById('fileModal')) closeFileModal();
             if (e.target === document.getElementById('commentsModal')) closeCommentsModal();
         });

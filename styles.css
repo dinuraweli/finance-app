@@ -1,4 +1,9 @@
-/* Dark Mode */
+/* Dark Mode 
+
+        const supabaseUrl = 'https://afolonwcevpgwldoqzcr.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmb2xvbndjZXZwZ3dsZG9xemNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNjQ0NTgsImV4cCI6MjA5Nzk0MDQ1OH0.Va_Sy8LLjTw1a0tp4ZfTmT52H5kj-50sr4_PA_EHgMM';
+
+*/
 [data-theme="dark"] {
     --bg-primary: #1a1a1a;
     --bg-secondary: #2d2d2d;
